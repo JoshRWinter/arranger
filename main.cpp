@@ -1,6 +1,12 @@
+#include <QApplication>
 #include "Arranger.h"
 
-int main()
+int main(int argc, char **argv)
 {
-	return 0;
+	QApplication app(argc, argv);
+
+	Arranger arranger;
+	arranger.show();
+
+	return app.exec();
 }

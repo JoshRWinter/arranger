@@ -1,6 +1,6 @@
 HEADERS += Arranger.h
 
-SOURCES += main.cpp
+SOURCES += main.cpp Arranger.cpp
 
 CONFIG += debug console
 
