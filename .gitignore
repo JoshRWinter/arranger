@@ -1,0 +1,7 @@
+*.o
+*.obj
+*.exe
+arranger
+.*.swp
+Makefile.qmake
+.qmake.stash
