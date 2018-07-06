@@ -1,6 +1,6 @@
-HEADERS += Arranger.h ArrangerPanel.h
+HEADERS += Arranger.h ArrangerPanel.h Targa.h
 
-SOURCES += main.cpp Arranger.cpp ArrangerPanel.cpp
+SOURCES += main.cpp Arranger.cpp ArrangerPanel.cpp Targa.cpp
 
 CONFIG += debug console
 

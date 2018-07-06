@@ -5,3 +5,4 @@ arranger
 .*.swp
 Makefile.qmake
 .qmake.stash
+*.tga

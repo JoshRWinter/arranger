@@ -12,6 +12,8 @@ public:
 	Arranger();
 
 private:
+	void slot_add_texture();
+
 	ArrangerPanel *m_panel;
 };
 
