@@ -13,16 +13,20 @@
 struct Texture
 {
 	Texture(const Targa &tga, int xc, int yc)
-		: x(xc)
+		: w(tga.get_width())
+		, h(tga.get_height())
+		, x(xc)
 		, y(yc)
 	{
-		raw.reset(new unsigned char[tga.get_width() * tga.get_height() * 4]);
+		raw.reset(new unsigned char[w * h * 4]);
 		tga.get_bitmap(raw.get());
-		img.reset(new QImage(raw.get(), tga.get_width(), tga.get_height(), QImage::Format_RGBA8888_Premultiplied));
+		img.reset(new QImage(raw.get(), w, h, QImage::Format_RGBA8888_Premultiplied));
 	}
 
 	std::unique_ptr<unsigned char[]> raw;
 	std::unique_ptr<QImage> img;
+	int w;
+	int h;
 	int x;
 	int y;
 };
@@ -36,9 +40,12 @@ public:
 
 protected:
 	virtual void paintEvent(QPaintEvent*) override;
+	virtual void mousePressEvent(QMouseEvent*) override;
+	virtual void mouseMoveEvent(QMouseEvent*) override;
 
 private:
 	std::unordered_map<std::string, Texture> textures;
+	struct { std::string name; int anchor_x, anchor_y; } active;
 };
 
 #endif
