@@ -4,6 +4,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QKeyEvent>
 
 #include "Arranger.h"
 
@@ -35,6 +36,29 @@ Arranger::Arranger()
 	vbox->addWidget(newtexture);
 	hbox->addLayout(vbox);
 	hbox->addWidget(m_panel);
+
+	// add some dummy textures
+	m_panel->add("/home/josh/fishtank/assets_local/mine.tga");
+	m_panel->add("/home/josh/fishtank/assets_local/turret.tga");
+	m_panel->add("/home/josh/fishtank/assets_local/tank.tga");
+	m_panel->add("/home/josh/fishtank/assets_local/dead_fish.tga");
+	m_panel->add("/home/josh/fishtank/assets_local/button.tga");
+}
+
+void Arranger::keyPressEvent(QKeyEvent *key)
+{
+	if(key->key() == Qt::Key_Control)
+		m_panel->set_align(true);
+	else if(key->key() == Qt::Key_Left)
+		m_panel->pack(true);
+	else if(key->key() == Qt::Key_Up)
+		m_panel->pack(false);
+}
+
+void Arranger::keyReleaseEvent(QKeyEvent *key)
+{
+	if(key->key() == Qt::Key_Control)
+		m_panel->set_align(false);
 }
 
 void Arranger::slot_add_texture()
