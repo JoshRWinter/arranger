@@ -12,6 +12,7 @@ ArrangerPanel::ArrangerPanel()
 	QPalette palette;
 	palette.setColor(QPalette::Background, QColor(220, 220, 220));
 	setPalette(palette);
+	setFocusPolicy(Qt::StrongFocus);
 }
 
 void ArrangerPanel::add(const std::string &filename)
