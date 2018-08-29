@@ -119,6 +119,16 @@ bool ArrangerPanel::get_border() const
 	return border;
 }
 
+std::vector<Entry> ArrangerPanel::get_entries() const
+{
+	std::vector<Entry> entries;
+
+	for(const auto &[name, texture] : textures)
+		entries.push_back(Entry(name, texture.x, texture.y));
+
+	return entries;
+}
+
 void ArrangerPanel::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);

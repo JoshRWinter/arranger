@@ -19,6 +19,7 @@ protected:
 private:
 	void slot_add_texture();
 	void slot_remove_texture();
+	void slot_export();
 
 	QListWidget *list;
 	ArrangerPanel *m_panel;

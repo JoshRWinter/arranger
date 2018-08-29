@@ -3,6 +3,7 @@
 
 #include <unordered_map>
 #include <memory>
+#include <vector>
 #include <cmath>
 
 #include <QWidget>
@@ -91,6 +92,15 @@ struct Texture
 	int y;
 };
 
+struct Entry
+{
+	Entry(const std::string &n, int xx, int yy) : name(n), x(xx), y(yy) {}
+
+	std::string name;
+	int x;
+	int y;
+};
+
 class ArrangerPanel : public QWidget
 {
 public:
@@ -102,6 +112,7 @@ public:
 	void pack(bool);
 	void set_border(bool);
 	bool get_border() const;
+	std::vector<Entry> get_entries() const;
 
 protected:
 	virtual void paintEvent(QPaintEvent*) override;

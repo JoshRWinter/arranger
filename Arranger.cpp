@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <QFileDialog>
 #include <QPushButton>
 #include <QHBoxLayout>
@@ -21,6 +23,7 @@ Arranger::Arranger()
 	list = new QListWidget;
 	auto newtexture = new QPushButton("Add Texture");
 	auto deletetexture = new QPushButton("Remove Texture");
+	auto exportatlas = new QPushButton("Export");
 	m_panel = new ArrangerPanel();
 
 	// sidebar widget settings
@@ -31,11 +34,13 @@ Arranger::Arranger()
 	// hook up dem buttuns
 	QObject::connect(newtexture, &QPushButton::clicked, this, &Arranger::slot_add_texture);
 	QObject::connect(deletetexture, &QPushButton::clicked, this, &Arranger::slot_remove_texture);
+	QObject::connect(exportatlas, &QPushButton::clicked, this, &Arranger::slot_export);
 
 	// stir it all together
 	vbox->addWidget(list);
 	vbox->addWidget(newtexture);
 	vbox->addWidget(deletetexture);
+	vbox->addWidget(exportatlas);
 	hbox->addLayout(vbox);
 	hbox->addWidget(m_panel);
 
@@ -103,4 +108,27 @@ void Arranger::slot_remove_texture()
 		QMessageBox::warning(this, "Couldn't remove texture", e.what());
 	}
 	delete list->takeItem(list->currentRow());
+}
+
+void Arranger::slot_export()
+{
+	const QString save = QFileDialog::getSaveFileName(this, "Export to...");
+	if(save.isNull())
+		return;
+	else if(save.toStdString().rfind(".txt") == std::string::npos)
+	{
+		QMessageBox::critical(this, "Error", "Unwilling to overwrite file \"" + save + "\"");
+		return;
+	}
+
+	std::ofstream out(save.toStdString());
+	if(!out)
+	{
+		QMessageBox::critical(this, "Error", "Could not open file \"" + save + "\" for writing");
+		return;
+	}
+
+	const std::vector<Entry> entries = m_panel->get_entries();
+	for(const Entry &entry : entries)
+		out << entry.name << " " << entry.x << " " << entry.y << "\n";
 }
