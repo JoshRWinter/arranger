@@ -53,6 +53,8 @@ void Arranger::keyPressEvent(QKeyEvent *key)
 		m_panel->pack(true);
 	else if(key->key() == Qt::Key_Up)
 		m_panel->pack(false);
+	else if(key->key() == Qt::Key_Alt)
+		m_panel->set_border(!m_panel->get_border());
 }
 
 void Arranger::keyReleaseEvent(QKeyEvent *key)

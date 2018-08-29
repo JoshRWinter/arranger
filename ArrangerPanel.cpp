@@ -6,6 +6,7 @@
 
 ArrangerPanel::ArrangerPanel()
 	: align(false)
+	, border(true)
 {
 	setAutoFillBackground(true);
 	QPalette palette;
@@ -90,6 +91,17 @@ void ArrangerPanel::pack(bool left)
 	repaint();
 }
 
+void ArrangerPanel::set_border(bool on)
+{
+	border = on;
+	repaint();
+}
+
+bool ArrangerPanel::get_border() const
+{
+	return border;
+}
+
 void ArrangerPanel::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
@@ -97,6 +109,9 @@ void ArrangerPanel::paintEvent(QPaintEvent*)
 	for(const auto &[_, texture] : textures)
 	{
 		painter.drawImage(QPoint(texture.x, texture.y), *texture.img.get());
+
+		if(border)
+			painter.drawRect(QRect(QPoint(texture.x, texture.y), QPoint(texture.x + texture.w - 1, texture.y + texture.h - 1)));
 	}
 
 	// draw active texture line

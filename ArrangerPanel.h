@@ -99,6 +99,8 @@ public:
 	void add(const std::string&);
 	void set_align(bool);
 	void pack(bool);
+	void set_border(bool);
+	bool get_border() const;
 
 protected:
 	virtual void paintEvent(QPaintEvent*) override;
@@ -107,6 +109,7 @@ protected:
 
 private:
 	bool align;
+	bool border;
 	std::unordered_map<std::string, Texture> textures;
 	struct { std::string name; int anchor_x, anchor_y; } active;
 };
