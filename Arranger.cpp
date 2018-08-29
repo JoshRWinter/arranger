@@ -1,4 +1,3 @@
-#include <QListWidget>
 #include <QFileDialog>
 #include <QPushButton>
 #include <QHBoxLayout>
@@ -19,8 +18,9 @@ Arranger::Arranger()
 	auto vbox = new QVBoxLayout;
 
 	// some widgets
-	auto list = new QListWidget;
+	list = new QListWidget;
 	auto newtexture = new QPushButton("Add Texture");
+	auto deletetexture = new QPushButton("Remove Texture");
 	m_panel = new ArrangerPanel();
 
 	// sidebar widget settings
@@ -30,10 +30,12 @@ Arranger::Arranger()
 
 	// hook up dem buttuns
 	QObject::connect(newtexture, &QPushButton::clicked, this, &Arranger::slot_add_texture);
+	QObject::connect(deletetexture, &QPushButton::clicked, this, &Arranger::slot_remove_texture);
 
 	// stir it all together
 	vbox->addWidget(list);
 	vbox->addWidget(newtexture);
+	vbox->addWidget(deletetexture);
 	hbox->addLayout(vbox);
 	hbox->addWidget(m_panel);
 
@@ -43,6 +45,11 @@ Arranger::Arranger()
 	m_panel->add("/home/josh/fishtank/assets_local/tank.tga");
 	m_panel->add("/home/josh/fishtank/assets_local/dead_fish.tga");
 	m_panel->add("/home/josh/fishtank/assets_local/button.tga");
+	list->addItem("/home/josh/fishtank/assets_local/mine.tga");
+	list->addItem("/home/josh/fishtank/assets_local/turret.tga");
+	list->addItem("/home/josh/fishtank/assets_local/tank.tga");
+	list->addItem("/home/josh/fishtank/assets_local/dead_fish.tga");
+	list->addItem("/home/josh/fishtank/assets_local/button.tga");
 }
 
 void Arranger::keyPressEvent(QKeyEvent *key)
@@ -71,10 +78,29 @@ void Arranger::slot_add_texture()
 
 	try
 	{
+		list->addItem(import);
 		m_panel->add(import.toStdString());
 	}
 	catch(const std::exception &e)
 	{
 		QMessageBox::critical(this, "Error", press::swrite("could not load file {}: {}", import.toStdString(), e.what()).c_str());
 	}
+}
+
+void Arranger::slot_remove_texture()
+{
+	QListWidgetItem *current = list->currentItem();
+	if(current == NULL)
+		return;
+
+	QString name = current->text();
+	try
+	{
+		m_panel->remove(name.toStdString());
+	}
+	catch(const std::exception &e)
+	{
+		QMessageBox::warning(this, "Couldn't remove texture", e.what());
+	}
+	delete list->takeItem(list->currentRow());
 }

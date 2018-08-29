@@ -97,6 +97,7 @@ public:
 	ArrangerPanel();
 
 	void add(const std::string&);
+	void remove(const std::string&);
 	void set_align(bool);
 	void pack(bool);
 	void set_border(bool);

@@ -27,6 +27,22 @@ void ArrangerPanel::add(const std::string &filename)
 	repaint();
 }
 
+void ArrangerPanel::remove(const std::string &name)
+{
+	for(auto it = textures.begin(); it != textures.end(); ++it)
+	{
+		if(it->first == name)
+		{
+			textures.erase(it);
+			active.name = "";
+			repaint();
+			return;
+		}
+	}
+
+	throw std::runtime_error("Couldn't find texture \"" + name + "\"");
+}
+
 void ArrangerPanel::set_align(bool yes)
 {
 	if(yes)

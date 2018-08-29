@@ -2,6 +2,7 @@
 #define ARRANGER_H
 
 #include <QWidget>
+#include <QListWidget>
 
 #include "press.h"
 #include "ArrangerPanel.h"
@@ -17,7 +18,9 @@ protected:
 
 private:
 	void slot_add_texture();
+	void slot_remove_texture();
 
+	QListWidget *list;
 	ArrangerPanel *m_panel;
 };
 
