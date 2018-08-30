@@ -60,7 +60,7 @@ Arranger::Arranger()
 void Arranger::keyPressEvent(QKeyEvent *key)
 {
 	if(key->key() == Qt::Key_Control)
-		m_panel->set_align(true);
+		m_panel->set_align(false);
 	else if(key->key() == Qt::Key_Left)
 		m_panel->pack(true);
 	else if(key->key() == Qt::Key_Up)
@@ -72,7 +72,7 @@ void Arranger::keyPressEvent(QKeyEvent *key)
 void Arranger::keyReleaseEvent(QKeyEvent *key)
 {
 	if(key->key() == Qt::Key_Control)
-		m_panel->set_align(false);
+		m_panel->set_align(true);
 }
 
 void Arranger::slot_add_texture()

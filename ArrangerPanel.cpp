@@ -5,7 +5,7 @@
 #include "ArrangerPanel.h"
 
 ArrangerPanel::ArrangerPanel()
-	: align(false)
+	: align(true)
 	, border(true)
 {
 	setAutoFillBackground(true);
@@ -46,31 +46,7 @@ void ArrangerPanel::remove(const std::string &name)
 
 void ArrangerPanel::set_align(bool yes)
 {
-	if(yes)
-	{
-		bool colliding = false;
-		if(active.name.length() > 0)
-		{
-			Texture &focus = textures.find(active.name)->second;
-			for(auto &[_, current] : textures)
-			{
-				if(&focus == &current)
-					continue;
-
-				if(focus.collide(current))
-				{
-					colliding = true;
-					break;
-				}
-			}
-
-			if(!colliding)
-				align = true;
-		}
-	}
-	else
-		align = false;
-
+	align = yes;
 	repaint();
 }
 
