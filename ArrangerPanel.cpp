@@ -103,6 +103,9 @@ void ArrangerPanel::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
 
+	int maxwidth = 0;
+	int maxheight = 0;
+
 	for(const auto &[name, texture] : textures)
 	{
 		painter.drawImage(QPoint(texture.x, texture.y), *texture.img.get());
@@ -115,7 +118,16 @@ void ArrangerPanel::paintEvent(QPaintEvent*)
 				painter.setPen(QColor(0, 0, 0));
 			painter.drawRect(QRect(QPoint(texture.x, texture.y), QPoint(texture.x + texture.w - 1, texture.y + texture.h - 1)));
 		}
+
+		if(texture.x + texture.w > maxwidth)
+			maxwidth = texture.x + texture.w;
+		if(texture.y + texture.h > maxheight)
+			maxheight = texture.y + texture.h;
 	}
+
+	// draw bounding box
+	painter.setPen(QColor(255, 0, 255));
+	painter.drawRect(QRect(QPoint(0, 0), QPoint(maxwidth, maxheight)));
 
 #if 0
 	// draw active texture line
