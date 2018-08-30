@@ -13,6 +13,7 @@ ArrangerPanel::ArrangerPanel()
 	palette.setColor(QPalette::Background, QColor(220, 220, 220));
 	setPalette(palette);
 	setFocusPolicy(Qt::StrongFocus);
+	resize(1000, 1000);
 }
 
 void ArrangerPanel::add(const std::string &filename)
@@ -22,7 +23,7 @@ void ArrangerPanel::add(const std::string &filename)
 
 	Targa tga(filename.c_str());
 
-	std::pair<std::string, Texture> pair(filename, std::move(Texture(tga, 0, height() - tga.get_height())));
+	std::pair<std::string, Texture> pair(filename, std::move(Texture(tga, 0, 0)));
 	textures.insert(std::move(pair));
 
 	repaint();

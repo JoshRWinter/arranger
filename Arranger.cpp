@@ -21,10 +21,12 @@ Arranger::Arranger()
 
 	// some widgets
 	list = new QListWidget;
+	scroller = new QScrollArea(this);
 	auto newtexture = new QPushButton("Add Texture");
 	auto deletetexture = new QPushButton("Remove Texture");
 	auto exportatlas = new QPushButton("Export");
 	m_panel = new ArrangerPanel();
+	scroller->setWidget(m_panel);
 
 	// sidebar widget settings
 	const int sidebar_width = 200;
@@ -42,7 +44,7 @@ Arranger::Arranger()
 	vbox->addWidget(deletetexture);
 	vbox->addWidget(exportatlas);
 	hbox->addLayout(vbox);
-	hbox->addWidget(m_panel);
+	hbox->addWidget(scroller);
 
 	// add some dummy textures
 	m_panel->add("/home/josh/fishtank/assets_local/mine.tga");

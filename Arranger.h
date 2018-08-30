@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QListWidget>
+#include <QScrollArea>
 
 #include "press.h"
 #include "ArrangerPanel.h"
@@ -21,6 +22,7 @@ private:
 	void slot_remove_texture();
 	void slot_export();
 
+	QScrollArea *scroller;
 	QListWidget *list;
 	ArrangerPanel *m_panel;
 };
