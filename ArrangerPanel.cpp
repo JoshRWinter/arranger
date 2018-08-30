@@ -109,17 +109,25 @@ void ArrangerPanel::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
 
-	for(const auto &[_, texture] : textures)
+	for(const auto &[name, texture] : textures)
 	{
 		painter.drawImage(QPoint(texture.x, texture.y), *texture.img.get());
 
 		if(border)
+		{
+			if(active.name == name)
+				painter.setPen(QColor(255, 0, 0));
+			else
+				painter.setPen(QColor(0, 0, 0));
 			painter.drawRect(QRect(QPoint(texture.x, texture.y), QPoint(texture.x + texture.w - 1, texture.y + texture.h - 1)));
+		}
 	}
 
+#if 0
 	// draw active texture line
 	if(active.name.length() > 0)
 		painter.drawText(QPoint(0, painter.fontMetrics().height()), press::swrite("Active Texture: {} [{}x{}]{}", active.name, textures[active.name].w, textures[active.name].h, align ? " ALIGNED" : "").c_str());
+#endif
 }
 
 void ArrangerPanel::mousePressEvent(QMouseEvent *event)
