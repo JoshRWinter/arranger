@@ -1,6 +1,8 @@
+#include <QMenu>
 #include <QPainter>
 #include <QMouseEvent>
 #include <QMessageBox>
+#include <QAction>
 
 #include "ArrangerPanel.h"
 
@@ -14,6 +16,12 @@ ArrangerPanel::ArrangerPanel()
 	setPalette(palette);
 	setFocusPolicy(Qt::StrongFocus);
 	resize(1000, 1000);
+
+	packleft = new QAction("Pack &Left", this);
+	packup = new QAction("Pack &Up", this);
+
+	QObject::connect(packleft, &QAction::triggered, this, &ArrangerPanel::pack_left);
+	QObject::connect(packup, &QAction::triggered, this, &ArrangerPanel::pack_up);
 }
 
 void ArrangerPanel::add(const std::string &filename)
@@ -51,40 +59,6 @@ void ArrangerPanel::set_align(bool yes)
 	repaint();
 }
 
-void ArrangerPanel::pack(bool left)
-{
-	if(Texture::colliding(textures))
-	{
-		QMessageBox::critical(this, "Can't pack", "There are collisions!");
-		return;
-	}
-
-	int moved = 0;
-	do
-	{
-		moved = 0;
-		for(auto &[_, current] : textures)
-		{
-			while(!Texture::colliding(current, textures) && current.x >= 0 && current.y >= 0)
-			{
-				++moved;
-				if(left)
-					--current.x;
-				else
-					--current.y;
-			}
-
-			--moved;
-			if(left)
-				++current.x;
-			else
-				++current.y;
-		}
-	}while(moved);
-
-	repaint();
-}
-
 void ArrangerPanel::set_border(bool on)
 {
 	border = on;
@@ -115,7 +89,6 @@ std::string ArrangerPanel::info() const
 	return "[" + std::to_string(maxwidth) + "x" + std::to_string(maxheight) + "], " +
 	sizestr + "MB";
 }
-
 std::vector<Entry> ArrangerPanel::get_entries() const
 {
 	std::vector<Entry> entries;
@@ -198,6 +171,58 @@ void ArrangerPanel::mouseMoveEvent(QMouseEvent *event)
 		tex.x = 0;
 	if(tex.y < 0)
 		tex.y = 0;
+
+	repaint();
+}
+
+void ArrangerPanel::contextMenuEvent(QContextMenuEvent *event)
+{
+	QMenu m(this);
+	m.addAction(packleft);
+	m.addAction(packup);
+	m.exec(event->globalPos());
+}
+
+void ArrangerPanel::pack_left()
+{
+	pack(true);
+}
+
+void ArrangerPanel::pack_up()
+{
+	pack(false);
+}
+
+void ArrangerPanel::pack(bool left)
+{
+	if(Texture::colliding(textures))
+	{
+		QMessageBox::critical(this, "Can't pack", "There are collisions!");
+		return;
+	}
+
+	int moved = 0;
+	do
+	{
+		moved = 0;
+		for(auto &[_, current] : textures)
+		{
+			while(!Texture::colliding(current, textures) && current.x >= 0 && current.y >= 0)
+			{
+				++moved;
+				if(left)
+					--current.x;
+				else
+					--current.y;
+			}
+
+			--moved;
+			if(left)
+				++current.x;
+			else
+				++current.y;
+		}
+	}while(moved);
 
 	repaint();
 }

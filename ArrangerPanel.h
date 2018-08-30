@@ -109,7 +109,6 @@ public:
 	void add(const std::string&);
 	void remove(const std::string&);
 	void set_align(bool);
-	void pack(bool);
 	void set_border(bool);
 	bool get_border() const;
 	std::string info() const;
@@ -119,12 +118,20 @@ protected:
 	virtual void paintEvent(QPaintEvent*) override;
 	virtual void mousePressEvent(QMouseEvent*) override;
 	virtual void mouseMoveEvent(QMouseEvent*) override;
+	virtual void contextMenuEvent(QContextMenuEvent*) override;
 
 private:
+	void pack_left();
+	void pack_up();
+	void pack(bool);
+
 	bool align;
 	bool border;
 	std::unordered_map<std::string, Texture> textures;
 	struct { std::string name; int anchor_x, anchor_y; } active;
+
+	QAction *packleft;
+	QAction *packup;
 };
 
 #endif
