@@ -96,6 +96,26 @@ bool ArrangerPanel::get_border() const
 	return border;
 }
 
+std::string ArrangerPanel::info() const
+{
+	int maxwidth = 0;
+	int maxheight = 0;
+
+	for(const auto &[_, texture] : textures)
+	{
+		if(texture.x + texture.w > maxwidth)
+			maxwidth = texture.x + texture.w;
+		if(texture.y + texture.h > maxheight)
+			maxheight = texture.y + texture.h;
+	}
+
+	char sizestr[50];
+	snprintf(sizestr, sizeof(sizestr), "%.2f", (maxwidth * maxheight * 4) / 1024.0 / 1024.0);
+
+	return "[" + std::to_string(maxwidth) + "x" + std::to_string(maxheight) + "], " +
+	sizestr + "MB";
+}
+
 std::vector<Entry> ArrangerPanel::get_entries() const
 {
 	std::vector<Entry> entries;

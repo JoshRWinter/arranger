@@ -112,6 +112,7 @@ public:
 	void pack(bool);
 	void set_border(bool);
 	bool get_border() const;
+	std::string info() const;
 	std::vector<Entry> get_entries() const;
 
 protected:
