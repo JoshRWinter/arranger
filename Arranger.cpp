@@ -25,11 +25,11 @@ Arranger::Arranger()
 	auto newtexture = new QPushButton("Add Texture");
 	auto deletetexture = new QPushButton("Remove Texture");
 	auto exportatlas = new QPushButton("Export");
-	m_panel = new ArrangerPanel();
+	m_panel = new ArrangerPanel(1);
 	scroller->setWidget(m_panel);
 
 	// sidebar widget settings
-	const int sidebar_width = 200;
+	const int sidebar_width = 275;
 	list->setMaximumWidth(sidebar_width);
 	newtexture->setMaximumWidth(sidebar_width);
 
@@ -115,9 +115,9 @@ void Arranger::slot_export()
 	const QString save = QFileDialog::getSaveFileName(this, "Export to...");
 	if(save.isNull())
 		return;
-	else if(save.toStdString().rfind(".txt") == std::string::npos)
+	if((int)save.toStdString().rfind(".adesc") != save.length() - 6)
 	{
-		QMessageBox::critical(this, "Error", "Unwilling to overwrite file \"" + save + "\"");
+		QMessageBox::critical(this, "Error", press::swrite("Unwilling to overwrite file {}", save.toStdString()).c_str());
 		return;
 	}
 
@@ -130,5 +130,5 @@ void Arranger::slot_export()
 
 	const std::vector<Entry> entries = m_panel->get_entries();
 	for(const Entry &entry : entries)
-		out << entry.name << " " << entry.x << " " << entry.y << "\n";
+		out << "\"" << entry.name << "\" " << entry.x << " " << entry.y << "\n";
 }

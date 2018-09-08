@@ -6,9 +6,10 @@
 
 #include "ArrangerPanel.h"
 
-ArrangerPanel::ArrangerPanel()
+ArrangerPanel::ArrangerPanel(int pad)
 	: align(true)
 	, border(true)
+	, padding(pad)
 {
 	setAutoFillBackground(true);
 	QPalette palette;
@@ -72,16 +73,8 @@ bool ArrangerPanel::get_border() const
 
 std::string ArrangerPanel::info() const
 {
-	int maxwidth = 0;
-	int maxheight = 0;
-
-	for(const auto &[_, texture] : textures)
-	{
-		if(texture.x + texture.w > maxwidth)
-			maxwidth = texture.x + texture.w;
-		if(texture.y + texture.h > maxheight)
-			maxheight = texture.y + texture.h;
-	}
+	int maxwidth = atlas_width();
+	int maxheight = atlas_height();
 
 	char sizestr[50];
 	snprintf(sizestr, sizeof(sizestr), "%.2f", (maxwidth * maxheight * 4) / 1024.0 / 1024.0);
@@ -94,7 +87,7 @@ std::vector<Entry> ArrangerPanel::get_entries() const
 	std::vector<Entry> entries;
 
 	for(const auto &[name, texture] : textures)
-		entries.push_back(Entry(name, texture.x, texture.y));
+		entries.push_back(Entry(name, texture.x, atlas_height() - texture.y - texture.h + padding));
 
 	return entries;
 }
@@ -103,8 +96,8 @@ void ArrangerPanel::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
 
-	int maxwidth = 0;
-	int maxheight = 0;
+	int maxwidth = atlas_width();
+	int maxheight = atlas_height();
 
 	for(const auto &[name, texture] : textures)
 	{
@@ -118,11 +111,6 @@ void ArrangerPanel::paintEvent(QPaintEvent*)
 				painter.setPen(QColor(0, 0, 0));
 			painter.drawRect(QRect(QPoint(texture.x, texture.y), QPoint(texture.x + texture.w - 1, texture.y + texture.h - 1)));
 		}
-
-		if(texture.x + texture.w > maxwidth)
-			maxwidth = texture.x + texture.w;
-		if(texture.y + texture.h > maxheight)
-			maxheight = texture.y + texture.h;
 	}
 
 	// draw bounding box
@@ -174,15 +162,15 @@ void ArrangerPanel::mouseMoveEvent(QMouseEvent *event)
 			if(&tex == &focus)
 				continue;
 
-			if(tex.collide(focus))
-				tex.correct(focus);
+			if(tex.collide(focus, padding))
+				tex.correct(focus, padding);
 		}
 	}
 
-	if(tex.x < 0)
-		tex.x = 0;
-	if(tex.y < 0)
-		tex.y = 0;
+	if(tex.x < padding)
+		tex.x = padding;
+	if(tex.y < padding)
+		tex.y = padding;
 
 	repaint();
 }
@@ -205,9 +193,35 @@ void ArrangerPanel::pack_up()
 	pack(false);
 }
 
+int ArrangerPanel::atlas_width() const
+{
+	int width = 0;
+
+	for(const auto &[_, tex] : textures)
+	{
+		if(tex.x + tex.w > width)
+			width = tex.x + tex.w;
+	}
+
+	return width;
+}
+
+int ArrangerPanel::atlas_height() const
+{
+	int height = 0;
+
+	for(const auto &[_, tex] : textures)
+	{
+		if(tex.y + tex.h > height)
+			height = tex.y + tex.h;
+	}
+
+	return height;
+}
+
 void ArrangerPanel::pack(bool left)
 {
-	if(Texture::colliding(textures))
+	if(Texture::colliding(textures, padding))
 	{
 		QMessageBox::critical(this, "Can't pack", "There are collisions!");
 		return;
@@ -219,7 +233,7 @@ void ArrangerPanel::pack(bool left)
 		moved = 0;
 		for(auto &[_, current] : textures)
 		{
-			while(!Texture::colliding(current, textures) && current.x >= 0 && current.y >= 0)
+			while(!Texture::colliding(current, textures, padding) && current.x >= padding && current.y >= padding)
 			{
 				++moved;
 				if(left)

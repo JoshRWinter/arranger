@@ -24,17 +24,15 @@ struct Texture
 		raw.reset(new unsigned char[w * h * 4]);
 		tga.get_bitmap(raw.get());
 		img.reset(new QImage(raw.get(), w, h, QImage::Format_RGBA8888_Premultiplied));
-		QTransform tr;
-		tr.rotate(180);
-		img.get()->operator=(img.get()->transformed(tr));
+		img->operator=(img->mirrored(false, true));
 	}
 
-	bool collide(const Texture &other) const
+	bool collide(const Texture &other, int padding) const
 	{
-		return x + w > other.x && x < other.x + other.w && y + h > other.y && y < other.y + other.h;
+		return x + w + padding > other.x && x < other.x + other.w + padding && y + h + padding > other.y && y < other.y + other.h + padding;
 	}
 
-	void correct(const Texture &other)
+	void correct(const Texture &other, int padding)
 	{
 		const float top_diff = std::abs(y - (other.y + other.h));
 		const float left_diff = std::abs(x - (other.x + other.w));
@@ -50,34 +48,34 @@ struct Texture
 			smallest = bottom_diff;
 
 		if(smallest == top_diff)
-			y = other.y + other.h;
+			y = other.y + other.h + padding;
 		else if(smallest == left_diff)
-			x = other.x + other.w;
+			x = other.x + other.w + padding;
 		else if(smallest == right_diff)
-			x = other.x - w;
+			x = other.x - w - padding;
 		else if(smallest == bottom_diff)
-			y = other.y - h;
+			y = other.y - h - padding;
 	}
 
-	static bool colliding(const Texture &check, const std::unordered_map<std::string, Texture> &list)
+	static bool colliding(const Texture &check, const std::unordered_map<std::string, Texture> &list, int padding)
 	{
 		for(auto &[_, test] : list)
 		{
 			if(&check == &test)
 				continue;
 
-			if(check.collide(test))
+			if(check.collide(test, padding))
 				return true;
 		}
 
 		return false;
 	}
 
-	static bool colliding(const std::unordered_map<std::string, Texture> &list)
+	static bool colliding(const std::unordered_map<std::string, Texture> &list, int padding)
 	{
 		for(auto &[_, test] : list)
 		{
-			if(colliding(test, list))
+			if(colliding(test, list, padding))
 				return true;
 		}
 
@@ -104,7 +102,7 @@ struct Entry
 class ArrangerPanel : public QWidget
 {
 public:
-	ArrangerPanel();
+	ArrangerPanel(int);
 
 	void add(const std::string&);
 	void remove(const std::string&);
@@ -124,6 +122,8 @@ private:
 	void pack_left();
 	void pack_up();
 	void pack(bool);
+	int atlas_width() const;
+	int atlas_height() const;
 
 	bool align;
 	bool border;
@@ -132,6 +132,7 @@ private:
 
 	QAction *packleft;
 	QAction *packup;
+	int padding;
 };
 
 #endif
