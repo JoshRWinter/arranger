@@ -1,0 +1,1 @@
+cl /EHsc /IC:\Qt\5.10.0\msvc2017_64\include\QtWidgets /IC:\Qt\5.10.0\msvc2017_64\include /IC:\Qt\5.10.0\msvc2017_64\include\QtGui /std:c++17 /Zi *.cpp C:\Qt\5.10.0\msvc2017_64\lib\Qt5Gui.lib C:\Qt\5.10.0\msvc2017_64\lib\Qt5Widgets.lib C:\Qt\5.10.0\msvc2017_64\lib\Qt5Core.lib /link /out:arranger.exe

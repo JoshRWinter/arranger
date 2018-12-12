@@ -1,4 +1,6 @@
 #include <fstream>
+#include <string>
+
 #include <string.h>
 
 #include "Targa.h"
