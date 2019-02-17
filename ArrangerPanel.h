@@ -105,6 +105,9 @@ public:
 	ArrangerPanel(int);
 
 	void add(const std::string&);
+	void add(const std::string&, int, int);
+	void flip();
+	void clear();
 	void remove(const std::string&);
 	void set_align(bool);
 	void set_border(bool);

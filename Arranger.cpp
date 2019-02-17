@@ -25,6 +25,7 @@ Arranger::Arranger()
 	auto newtexture = new QPushButton("Add Texture");
 	auto deletetexture = new QPushButton("Remove Texture");
 	auto exportatlas = new QPushButton("Export");
+	auto importatlas = new QPushButton("Import");
 	m_panel = new ArrangerPanel(1);
 	scroller->setWidget(m_panel);
 
@@ -37,26 +38,16 @@ Arranger::Arranger()
 	QObject::connect(newtexture, &QPushButton::clicked, this, &Arranger::slot_add_texture);
 	QObject::connect(deletetexture, &QPushButton::clicked, this, &Arranger::slot_remove_texture);
 	QObject::connect(exportatlas, &QPushButton::clicked, this, &Arranger::slot_export);
+	QObject::connect(importatlas, &QPushButton::clicked, this, &Arranger::slot_import);
 
 	// stir it all together
 	vbox->addWidget(list);
 	vbox->addWidget(newtexture);
 	vbox->addWidget(deletetexture);
+	vbox->addWidget(importatlas);
 	vbox->addWidget(exportatlas);
 	hbox->addLayout(vbox);
 	hbox->addWidget(scroller);
-
-	// add some dummy textures
-	m_panel->add("/home/josh/fishtank/assets_local/mine.tga");
-	m_panel->add("/home/josh/fishtank/assets_local/turret.tga");
-	m_panel->add("/home/josh/fishtank/assets_local/tank.tga");
-	m_panel->add("/home/josh/fishtank/assets_local/dead_fish.tga");
-	m_panel->add("/home/josh/fishtank/assets_local/button.tga");
-	list->addItem("/home/josh/fishtank/assets_local/mine.tga");
-	list->addItem("/home/josh/fishtank/assets_local/turret.tga");
-	list->addItem("/home/josh/fishtank/assets_local/tank.tga");
-	list->addItem("/home/josh/fishtank/assets_local/dead_fish.tga");
-	list->addItem("/home/josh/fishtank/assets_local/button.tga");
 }
 
 void Arranger::keyPressEvent(QKeyEvent *key)
@@ -83,8 +74,8 @@ void Arranger::slot_add_texture()
 
 	try
 	{
-		list->addItem(import);
 		m_panel->add(import.toStdString());
+		list->addItem(import);
 	}
 	catch(const std::exception &e)
 	{
@@ -131,4 +122,70 @@ void Arranger::slot_export()
 	const std::vector<Entry> entries = m_panel->get_entries();
 	for(const Entry &entry : entries)
 		out << "\"" << entry.name << "\" " << entry.x << " " << entry.y << "\n";
+}
+
+void Arranger::slot_import()
+{
+	m_panel->clear();
+	list->clear();
+	const QString import = QFileDialog::getOpenFileName(this, "Import atlas...");
+	if(import.isNull())
+		return;
+
+	// read lines and import atlases
+	std::ifstream in(import.toStdString());
+	if(!in)
+	{
+		QMessageBox::critical(this, "Error", "Could not open file \"" + import + "\" for reading");
+		return;
+	}
+
+	int lineno = 0;
+	try
+	{
+		while(in.good())
+		{
+			++lineno;
+
+			std::string line;
+			std::getline(in, line);
+			if(line.length() == 0 || line == "\n")
+				continue;
+
+			if(line.at(0) != '"')
+				throw std::runtime_error("malformed input line");
+
+			const int second_quote_position = line.find("\"", 1);
+			const int first_space = line.find(" ", second_quote_position + 1);
+			const int second_space = line.find(" ", first_space + 1);
+
+			// file name
+			const std::string filepath = line.substr(1, second_quote_position - 1);
+
+			// x coord
+			const std::string str_xcoord = line.substr(first_space + 1, second_space - first_space - 1);
+			int xcoord;
+			if(sscanf(str_xcoord.c_str(), "%d", &xcoord) != 1)
+				throw std::runtime_error("couldn't convert \"" + str_xcoord + "\" to an integer");
+
+			// ycoord
+			const std::string str_ycoord = line.substr(second_space + 1);
+			int ycoord;
+			if(sscanf(str_ycoord.c_str(), "%d", &ycoord) != 1)
+				throw std::runtime_error("couldn't convert \"" + str_ycoord + "\" to an integer");
+
+			m_panel->add(filepath, xcoord, ycoord);
+			list->addItem(filepath.c_str());
+		}
+
+		m_panel->flip();
+	}
+	catch(const std::runtime_error &e)
+	{
+		QMessageBox::critical(this, "Error", e.what());
+	}
+	catch(...)
+	{
+		QMessageBox::critical(this, "Error", "Malformed input");
+	}
 }

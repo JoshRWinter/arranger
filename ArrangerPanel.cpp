@@ -27,14 +27,47 @@ ArrangerPanel::ArrangerPanel(int pad)
 
 void ArrangerPanel::add(const std::string &filename)
 {
+	add(filename, 0, 0);
+}
+
+void ArrangerPanel::add(const std::string &filename, int x, int y)
+{
+	if(x < 0 || y < 0)
+		throw std::runtime_error("invalid placement");
+
 	if(textures.find(filename) != textures.end())
 		throw std::runtime_error("Already exists");
 
 	Targa tga(filename.c_str());
 
-	std::pair<std::string, Texture> pair(filename, std::move(Texture(tga, 0, 0)));
+	std::pair<std::string, Texture> pair(filename, std::move(Texture(tga, x, y)));
 	textures.insert(std::move(pair));
 
+	repaint();
+}
+
+void ArrangerPanel::flip()
+{
+	int largest_y = 0;
+	for(std::pair<const std::string, Texture> &item : textures)
+	{
+		if(item.second.y + item.second.h > largest_y)
+			largest_y = item.second.y + item.second.h;
+	}
+
+	for(std::pair<const std::string, Texture> &item : textures)
+	{
+		item.second.y = largest_y - (item.second.y + item.second.h);
+		if(item.second.y < 0)
+			fprintf(stderr, "ERROR ----------------------- %s is at %d\n", item.first.c_str(), item.second.y);
+	}
+
+	repaint();
+}
+
+void ArrangerPanel::clear()
+{
+	textures.clear();
 	repaint();
 }
 

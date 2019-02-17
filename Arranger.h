@@ -21,6 +21,7 @@ private:
 	void slot_add_texture();
 	void slot_remove_texture();
 	void slot_export();
+	void slot_import();
 
 	QScrollArea *scroller;
 	QListWidget *list;
