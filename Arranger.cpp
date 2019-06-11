@@ -68,7 +68,10 @@ void Arranger::keyReleaseEvent(QKeyEvent *key)
 
 void Arranger::slot_add_texture()
 {
-	const QString import = QFileDialog::getOpenFileName(this, "Add Texture", "", "Targa TGA Images (*.tga)");
+	const QString path = QFileDialog::getOpenFileName(this, "Add Texture", "", "Targa TGA Images (*.tga)");
+	const QDir current = QDir::currentPath();
+	const QString import = current.relativeFilePath(path);
+
 	if(import.isNull())
 		return;
 
