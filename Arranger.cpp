@@ -16,6 +16,7 @@ Arranger::Arranger()
 
 	// layouts
 	auto hbox = new QHBoxLayout;
+	auto hbox_listitem_controls = new QHBoxLayout;
 	setLayout(hbox);
 	auto vbox = new QVBoxLayout;
 
@@ -26,6 +27,7 @@ Arranger::Arranger()
 	auto deletetexture = new QPushButton("Remove Texture");
 	auto exportatlas = new QPushButton("Export");
 	auto importatlas = new QPushButton("Import");
+	auto reload = new QPushButton(style()->standardIcon(QStyle::SP_BrowserReload), "");
 	m_panel = new ArrangerPanel(1);
 	scroller->setWidget(m_panel);
 
@@ -39,9 +41,12 @@ Arranger::Arranger()
 	QObject::connect(deletetexture, &QPushButton::clicked, this, &Arranger::slot_remove_texture);
 	QObject::connect(exportatlas, &QPushButton::clicked, this, &Arranger::slot_export);
 	QObject::connect(importatlas, &QPushButton::clicked, this, &Arranger::slot_import);
+	QObject::connect(reload, &QPushButton::clicked, this, &Arranger::slot_reload);
 
 	// stir it all together
+	hbox_listitem_controls->addWidget(reload);
 	vbox->addWidget(list);
+	vbox->addLayout(hbox_listitem_controls);
 	vbox->addWidget(newtexture);
 	vbox->addWidget(deletetexture);
 	vbox->addWidget(importatlas);
@@ -190,5 +195,24 @@ void Arranger::slot_import()
 	catch(...)
 	{
 		QMessageBox::critical(this, "Error", "Malformed input");
+	}
+}
+
+void Arranger::slot_reload()
+{
+	QListWidgetItem *current = list->currentItem();
+	if(current == NULL)
+	{
+		QMessageBox::warning(this, "Invalid", "Select a texture from the list on the left");
+		return;
+	}
+
+	try
+	{
+		m_panel->reload(current->text().toStdString());
+	}
+	catch(const std::runtime_error &e)
+	{
+		QMessageBox::critical(this, "Error", e.what());
 	}
 }

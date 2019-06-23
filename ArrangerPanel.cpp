@@ -46,6 +46,18 @@ void ArrangerPanel::add(const std::string &filename, int x, int y)
 	repaint();
 }
 
+void ArrangerPanel::reload(const std::string &filename)
+{
+	auto it = textures.find(filename);
+	if(it == textures.end())
+		throw std::runtime_error(filename + " doesn't exist");
+
+	Targa tga(filename.c_str());
+	it->second.replace_img(tga);
+
+	repaint();
+}
+
 void ArrangerPanel::flip()
 {
 	int largest_y = 0;

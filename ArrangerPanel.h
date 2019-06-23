@@ -32,6 +32,16 @@ struct Texture
 		return x + w + padding > other.x && x < other.x + other.w + padding && y + h + padding > other.y && y < other.y + other.h + padding;
 	}
 
+	void replace_img(const Targa &tga)
+	{
+		w = tga.get_width();
+		h = tga.get_height();
+		raw.reset(new unsigned char[w * h * 4]);
+		tga.get_bitmap(raw.get());
+		img.reset(new QImage(raw.get(), w, h, QImage::Format_RGBA8888_Premultiplied));
+		img->operator=(img->mirrored(false, true));
+	}
+
 	void correct(const Texture &other, int padding)
 	{
 		const float top_diff = std::abs(y - (other.y + other.h));
@@ -106,6 +116,7 @@ public:
 
 	void add(const std::string&);
 	void add(const std::string&, int, int);
+	void reload(const std::string&);
 	void flip();
 	void clear();
 	void remove(const std::string&);
