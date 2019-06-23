@@ -59,7 +59,7 @@ void Arranger::keyPressEvent(QKeyEvent *key)
 {
 	if(key->key() == Qt::Key_Control)
 		m_panel->set_align(false);
-	else if(key->key() == Qt::Key_Alt)
+	else if(key->key() == Qt::Key_B)
 		m_panel->set_border(!m_panel->get_border());
 	else if(key->key() == Qt::Key_Return)
 		QMessageBox::information(this, "Atlas info", m_panel->info().c_str());
