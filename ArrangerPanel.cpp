@@ -35,43 +35,62 @@ void ArrangerPanel::add(const std::string &filename, int x, int y)
 	if(x < 0 || y < 0)
 		throw std::runtime_error("invalid placement");
 
-	if(textures.find(filename) != textures.end())
-		throw std::runtime_error("Already exists");
+	for(const auto &[name, _] : textures)
+		if(name == filename)
+			throw std::runtime_error("Already exists");
 
 	Targa tga(filename.c_str());
 
 	std::pair<std::string, Texture> pair(filename, std::move(Texture(tga, x, y)));
-	textures.insert(std::move(pair));
+	textures.push_back(std::move(pair));
 
 	repaint();
 }
 
-void ArrangerPanel::reload(const std::string &filename)
+int ArrangerPanel::get_largest_index() const
 {
-	auto it = textures.find(filename);
-	if(it == textures.end())
-		throw std::runtime_error(filename + " doesn't exist");
+	return textures.size() - 1;
+}
 
-	Targa tga(filename.c_str());
+void ArrangerPanel::reload(int i)
+{
+	if(i >= (int)textures.size() || i < 0)
+		throw new std::runtime_error("no index " + std::to_string(i));
+
+	auto it = textures.begin() + i;
+
+	Targa tga(it->first.c_str());
 	it->second.replace_img(tga);
 
 	repaint();
 }
 
+std::vector<std::string> ArrangerPanel::get_list() const
+{
+	std::vector<std::string> items;
+
+	for(int i = 0; i < (int)textures.size(); ++i)
+	{
+		items.push_back(std::to_string(i) + ": " + textures[i].first);
+	}
+
+	return items;
+}
+
 void ArrangerPanel::flip()
 {
 	int largest_y = 0;
-	for(std::pair<const std::string, Texture> &item : textures)
+	for(const auto &[name, tex] : textures)
 	{
-		if(item.second.y + item.second.h > largest_y)
-			largest_y = item.second.y + item.second.h;
+		if(tex.y + tex.h > largest_y)
+			largest_y = tex.y + tex.h;
 	}
 
-	for(std::pair<const std::string, Texture> &item : textures)
+	for(auto &[name, tex] : textures)
 	{
-		item.second.y = largest_y - (item.second.y + item.second.h);
-		if(item.second.y < 0)
-			fprintf(stderr, "ERROR ----------------------- %s is at %d\n", item.first.c_str(), item.second.y);
+		tex.y = largest_y - (tex.y + tex.h);
+		if(tex.y < 0)
+			fprintf(stderr, "ERROR ----------------------- %s is at %d\n", name.c_str(), tex.y);
 	}
 
 	repaint();
@@ -83,20 +102,35 @@ void ArrangerPanel::clear()
 	repaint();
 }
 
-void ArrangerPanel::remove(const std::string &name)
+void ArrangerPanel::remove(int index)
 {
-	for(auto it = textures.begin(); it != textures.end(); ++it)
-	{
-		if(it->first == name)
-		{
-			textures.erase(it);
-			active.name = "";
-			repaint();
-			return;
-		}
-	}
+	if(index >= (int)textures.size() || index < 0)
+		throw std::runtime_error("Couldn't find texture index \"" + std::to_string(index) + "\"");
 
-	throw std::runtime_error("Couldn't find texture \"" + name + "\"");
+	textures.erase(textures.begin() + index);
+
+	active.name = "";
+	repaint();
+}
+
+void ArrangerPanel::move_up(int index)
+{
+	if(index < 1)
+		return;
+
+	std::pair<std::string, Texture> temp = std::move(textures[index - 1]);
+	textures[index - 1] = std::move(textures[index]);
+	textures[index] = std::move(temp);
+}
+
+void ArrangerPanel::move_down(int index)
+{
+	if(index >= ((int)textures.size()) - 1)
+		return;
+
+	std::pair<std::string, Texture> temp = std::move(textures[index]);
+	textures[index] = std::move(textures[index + 1]);
+	textures[index + 1] = std::move(temp);
 }
 
 void ArrangerPanel::set_align(bool yes)
@@ -195,7 +229,12 @@ void ArrangerPanel::mouseMoveEvent(QMouseEvent *event)
 	if(active.name.length() == 0)
 		return;
 
-	Texture &tex = textures.find(active.name)->second;
+	auto it = textures.begin();
+	for(;it != textures.end(); it++)
+		if(it->first == active.name)
+			break;
+	Texture &tex = it->second;
+
 	tex.x = event->pos().x() - active.anchor_x;
 	tex.y = event->pos().y() - active.anchor_y;
 

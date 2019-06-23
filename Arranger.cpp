@@ -28,6 +28,8 @@ Arranger::Arranger()
 	auto exportatlas = new QPushButton("Export");
 	auto importatlas = new QPushButton("Import");
 	auto reload = new QPushButton(style()->standardIcon(QStyle::SP_BrowserReload), "");
+	auto moveup = new QPushButton(style()->standardIcon(QStyle::SP_ArrowUp), "");
+	auto movedown = new QPushButton(style()->standardIcon(QStyle::SP_ArrowDown), "");
 	m_panel = new ArrangerPanel(1);
 	scroller->setWidget(m_panel);
 
@@ -42,9 +44,13 @@ Arranger::Arranger()
 	QObject::connect(exportatlas, &QPushButton::clicked, this, &Arranger::slot_export);
 	QObject::connect(importatlas, &QPushButton::clicked, this, &Arranger::slot_import);
 	QObject::connect(reload, &QPushButton::clicked, this, &Arranger::slot_reload);
+	QObject::connect(moveup, &QPushButton::clicked, this, &Arranger::slot_moveup);
+	QObject::connect(movedown, &QPushButton::clicked, this, &Arranger::slot_movedown);
 
 	// stir it all together
 	hbox_listitem_controls->addWidget(reload);
+	hbox_listitem_controls->addWidget(moveup);
+	hbox_listitem_controls->addWidget(movedown);
 	vbox->addWidget(list);
 	vbox->addLayout(hbox_listitem_controls);
 	vbox->addWidget(newtexture);
@@ -71,6 +77,16 @@ void Arranger::keyReleaseEvent(QKeyEvent *key)
 		m_panel->set_align(true);
 }
 
+void Arranger::refresh_list()
+{
+	list->clear();
+
+	for(const std::string &item : m_panel->get_list())
+	{
+		list->addItem(item.c_str());
+	}
+}
+
 void Arranger::slot_add_texture()
 {
 	const QString path = QFileDialog::getOpenFileName(this, "Add Texture", "", "Targa TGA Images (*.tga)");
@@ -83,7 +99,7 @@ void Arranger::slot_add_texture()
 	try
 	{
 		m_panel->add(import.toStdString());
-		list->addItem(import);
+		refresh_list();
 	}
 	catch(const std::exception &e)
 	{
@@ -100,13 +116,13 @@ void Arranger::slot_remove_texture()
 	QString name = current->text();
 	try
 	{
-		m_panel->remove(name.toStdString());
+		m_panel->remove(list->currentRow());
+		refresh_list();
 	}
 	catch(const std::exception &e)
 	{
 		QMessageBox::warning(this, "Couldn't remove texture", e.what());
 	}
-	delete list->takeItem(list->currentRow());
 }
 
 void Arranger::slot_export()
@@ -183,10 +199,10 @@ void Arranger::slot_import()
 				throw std::runtime_error("couldn't convert \"" + str_ycoord + "\" to an integer");
 
 			m_panel->add(filepath, xcoord, ycoord);
-			list->addItem(filepath.c_str());
 		}
 
 		m_panel->flip();
+		refresh_list();
 	}
 	catch(const std::runtime_error &e)
 	{
@@ -209,10 +225,34 @@ void Arranger::slot_reload()
 
 	try
 	{
-		m_panel->reload(current->text().toStdString());
+		m_panel->reload(list->currentRow());
 	}
 	catch(const std::runtime_error &e)
 	{
 		QMessageBox::critical(this, "Error", e.what());
 	}
+}
+
+void Arranger::slot_moveup()
+{
+	if(list->currentItem() == NULL)
+	{
+		QMessageBox::warning(this, "Invalid", "Seclect a texture from the list on the left");
+		return;
+	}
+
+	m_panel->move_up(list->currentRow());
+	refresh_list();
+}
+
+void Arranger::slot_movedown()
+{
+	if(list->currentItem() == NULL)
+	{
+		QMessageBox::warning(this, "Invalid", "Seclect a texture from the list on the left");
+		return;
+	}
+
+	m_panel->move_down(list->currentRow());
+	refresh_list();
 }

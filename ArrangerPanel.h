@@ -15,6 +15,16 @@
 struct Texture
 {
 	Texture() : w(0), h(0), x(0), y(0) {}
+	Texture(const Texture&) = delete;
+	Texture(Texture &&rhs)
+	{
+		w = rhs.w;
+		h = rhs.h;
+		x = rhs.x;
+		y = rhs.y;
+		img = std::move(rhs.img);
+		raw = std::move(rhs.raw);
+	}
 	Texture(const Targa &tga, int xc, int yc)
 		: w(tga.get_width())
 		, h(tga.get_height())
@@ -25,6 +35,17 @@ struct Texture
 		tga.get_bitmap(raw.get());
 		img.reset(new QImage(raw.get(), w, h, QImage::Format_RGBA8888_Premultiplied));
 		img->operator=(img->mirrored(false, true));
+	}
+	Texture &operator=(Texture &&rhs)
+	{
+		w = rhs.w;
+		h = rhs.h;
+		x = rhs.x;
+		y = rhs.y;
+		raw = std::move(rhs.raw);
+		img = std::move(rhs.img);
+
+		return *this;
 	}
 
 	bool collide(const Texture &other, int padding) const
@@ -67,7 +88,7 @@ struct Texture
 			y = other.y - h - padding;
 	}
 
-	static bool colliding(const Texture &check, const std::unordered_map<std::string, Texture> &list, int padding)
+	static bool colliding(const Texture &check, const std::vector<std::pair<std::string, Texture>> &list, int padding)
 	{
 		for(auto &[_, test] : list)
 		{
@@ -81,7 +102,7 @@ struct Texture
 		return false;
 	}
 
-	static bool colliding(const std::unordered_map<std::string, Texture> &list, int padding)
+	static bool colliding(const std::vector<std::pair<std::string, Texture>> &list, int padding)
 	{
 		for(auto &[_, test] : list)
 		{
@@ -116,10 +137,14 @@ public:
 
 	void add(const std::string&);
 	void add(const std::string&, int, int);
-	void reload(const std::string&);
+	int get_largest_index() const;
+	void reload(int);
+	std::vector<std::string> get_list() const;
 	void flip();
 	void clear();
-	void remove(const std::string&);
+	void remove(int);
+	void move_up(int);
+	void move_down(int);
 	void set_align(bool);
 	void set_border(bool);
 	bool get_border() const;
@@ -141,7 +166,7 @@ private:
 
 	bool align;
 	bool border;
-	std::unordered_map<std::string, Texture> textures;
+	std::vector<std::pair<std::string, Texture>> textures;
 	struct { std::string name; int anchor_x, anchor_y; } active;
 
 	QAction *packleft;
