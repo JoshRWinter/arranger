@@ -113,24 +113,28 @@ void ArrangerPanel::remove(int index)
 	repaint();
 }
 
-void ArrangerPanel::move_up(int index)
+int ArrangerPanel::move_up(int index)
 {
 	if(index < 1)
-		return;
+		return index;
 
 	std::pair<std::string, Texture> temp = std::move(textures[index - 1]);
 	textures[index - 1] = std::move(textures[index]);
 	textures[index] = std::move(temp);
+
+	return index - 1;
 }
 
-void ArrangerPanel::move_down(int index)
+int ArrangerPanel::move_down(int index)
 {
 	if(index >= ((int)textures.size()) - 1)
-		return;
+		return index;
 
 	std::pair<std::string, Texture> temp = std::move(textures[index]);
 	textures[index] = std::move(textures[index + 1]);
 	textures[index + 1] = std::move(temp);
+
+	return index + 1;
 }
 
 void ArrangerPanel::set_align(bool yes)

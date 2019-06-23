@@ -241,8 +241,9 @@ void Arranger::slot_moveup()
 		return;
 	}
 
-	m_panel->move_up(list->currentRow());
+	int newrow = m_panel->move_up(list->currentRow());
 	refresh_list();
+	list->setCurrentRow(newrow);
 }
 
 void Arranger::slot_movedown()
@@ -253,6 +254,7 @@ void Arranger::slot_movedown()
 		return;
 	}
 
-	m_panel->move_down(list->currentRow());
+	int newrow = m_panel->move_down(list->currentRow());
 	refresh_list();
+	list->setCurrentRow(newrow);
 }

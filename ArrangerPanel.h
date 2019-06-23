@@ -143,8 +143,8 @@ public:
 	void flip();
 	void clear();
 	void remove(int);
-	void move_up(int);
-	void move_down(int);
+	int move_up(int);
+	int move_down(int);
 	void set_align(bool);
 	void set_border(bool);
 	bool get_border() const;
