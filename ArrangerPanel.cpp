@@ -211,9 +211,12 @@ void ArrangerPanel::paintEvent(QPaintEvent*)
 		}
 	}
 
-	// draw bounding box
-	painter.setPen(QColor(255, 0, 255));
-	painter.drawRect(QRect(QPoint(0, 0), QPoint(maxwidth, maxheight)));
+	if(textures.size() > 0)
+	{
+		// draw bounding box
+		painter.setPen(QColor(255, 0, 255));
+		painter.drawRect(QRect(QPoint(0, 0), QPoint(maxwidth, maxheight)));
+	}
 
 #if 0
 	// draw active texture line
