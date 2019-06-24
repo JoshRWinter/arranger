@@ -150,6 +150,8 @@ public:
 	bool get_border() const;
 	std::string info() const;
 	std::vector<Entry> get_entries() const;
+	bool pack_left();
+	bool pack_up();
 
 protected:
 	virtual void paintEvent(QPaintEvent*) override;
@@ -158,9 +160,7 @@ protected:
 	virtual void contextMenuEvent(QContextMenuEvent*) override;
 
 private:
-	void pack_left();
-	void pack_up();
-	void pack(bool);
+	bool pack(bool);
 	int atlas_width() const;
 	int atlas_height() const;
 

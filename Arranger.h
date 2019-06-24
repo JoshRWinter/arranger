@@ -21,6 +21,7 @@ private:
 	void refresh_list();
 	void slot_add_texture();
 	void slot_remove_texture();
+	void slot_compact();
 	void slot_export();
 	void slot_import();
 	void slot_reload();

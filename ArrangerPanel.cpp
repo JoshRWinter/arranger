@@ -44,8 +44,10 @@ void ArrangerPanel::add(const std::string &filename)
 
 void ArrangerPanel::add(const std::string &filename, int x, int y)
 {
-	if(x < padding || y < padding)
-		throw std::runtime_error("invalid placement");
+	if(x < padding)
+		x = padding;
+	if(y < padding)
+		y = padding;
 
 	for(const auto &[name, _] : textures)
 		if(name == filename)
@@ -190,6 +192,16 @@ std::vector<Entry> ArrangerPanel::get_entries() const
 	return entries;
 }
 
+bool ArrangerPanel::pack_left()
+{
+	return pack(true);
+}
+
+bool ArrangerPanel::pack_up()
+{
+	return pack(false);
+}
+
 void ArrangerPanel::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
@@ -311,16 +323,6 @@ void ArrangerPanel::contextMenuEvent(QContextMenuEvent *event)
 	m.exec(event->globalPos());
 }
 
-void ArrangerPanel::pack_left()
-{
-	pack(true);
-}
-
-void ArrangerPanel::pack_up()
-{
-	pack(false);
-}
-
 int ArrangerPanel::atlas_width() const
 {
 	int width = 0;
@@ -347,20 +349,35 @@ int ArrangerPanel::atlas_height() const
 	return height;
 }
 
-void ArrangerPanel::pack(bool left)
+bool ArrangerPanel::pack(bool left)
 {
+	// double check there are no textures out of bounds
+	for(const auto &[n, t] : textures)
+	{
+		if(t.x < padding || t.y < padding)
+		{
+			QMessageBox::critical(this, "Can't pack", (n + " is out of bounds!").c_str());
+			return false;
+		}
+	}
+
 	if(Texture::colliding(textures, padding))
 	{
 		QMessageBox::critical(this, "Can't pack", "There are collisions!");
-		return;
+		return false;
 	}
 
+	bool changed = false;
 	int moved = 0;
 	do
 	{
 		moved = 0;
 		for(auto &[_, current] : textures)
 		{
+			const int original_x = current.x;
+			const int original_y = current.y;
+
+			// move it till it doesn't fit
 			while(!Texture::colliding(current, textures, padding) && current.x >= padding && current.y >= padding)
 			{
 				++moved;
@@ -370,13 +387,19 @@ void ArrangerPanel::pack(bool left)
 					--current.y;
 			}
 
+			// make it fit again
 			--moved;
 			if(left)
 				++current.x;
 			else
 				++current.y;
+
+			if(original_x != current.x || original_y != current.y)
+				changed = true;
 		}
 	}while(moved);
 
 	repaint();
+
+	return changed;
 }

@@ -25,6 +25,7 @@ Arranger::Arranger()
 	scroller = new QScrollArea(this);
 	auto newtexture = new QPushButton("Add Texture");
 	auto deletetexture = new QPushButton("Remove Texture");
+	auto compact = new QPushButton("Compact");
 	auto exportatlas = new QPushButton("Export");
 	auto importatlas = new QPushButton("Import");
 	auto reload = new QPushButton(style()->standardIcon(QStyle::SP_BrowserReload), "");
@@ -41,6 +42,7 @@ Arranger::Arranger()
 	// hook up dem buttuns
 	QObject::connect(newtexture, &QPushButton::clicked, this, &Arranger::slot_add_texture);
 	QObject::connect(deletetexture, &QPushButton::clicked, this, &Arranger::slot_remove_texture);
+	QObject::connect(compact, &QPushButton::clicked, this, &Arranger::slot_compact);
 	QObject::connect(exportatlas, &QPushButton::clicked, this, &Arranger::slot_export);
 	QObject::connect(importatlas, &QPushButton::clicked, this, &Arranger::slot_import);
 	QObject::connect(reload, &QPushButton::clicked, this, &Arranger::slot_reload);
@@ -55,6 +57,7 @@ Arranger::Arranger()
 	vbox->addLayout(hbox_listitem_controls);
 	vbox->addWidget(newtexture);
 	vbox->addWidget(deletetexture);
+	vbox->addWidget(compact);
 	vbox->addWidget(importatlas);
 	vbox->addWidget(exportatlas);
 	hbox->addLayout(vbox);
@@ -123,6 +126,19 @@ void Arranger::slot_remove_texture()
 	{
 		QMessageBox::warning(this, "Couldn't remove texture", e.what());
 	}
+}
+
+void Arranger::slot_compact()
+{
+	int moved;
+	do
+	{
+		moved = 0;
+
+		moved += m_panel->pack_left() ? 1 : 0;
+		moved += m_panel->pack_up() ? 1 : 0;
+	}
+	while(moved > 0);
 }
 
 void Arranger::slot_export()
