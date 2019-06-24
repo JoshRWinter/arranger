@@ -168,6 +168,7 @@ private:
 	bool border;
 	std::vector<std::pair<std::string, Texture>> textures;
 	struct { std::string name; int anchor_x, anchor_y; } active;
+	struct { bool adding; std::string filename; } adding;
 
 	QAction *packleft;
 	QAction *packup;

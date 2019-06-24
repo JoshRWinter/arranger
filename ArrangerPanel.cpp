@@ -23,16 +23,28 @@ ArrangerPanel::ArrangerPanel(int pad)
 
 	QObject::connect(packleft, &QAction::triggered, this, &ArrangerPanel::pack_left);
 	QObject::connect(packup, &QAction::triggered, this, &ArrangerPanel::pack_up);
+
+	active.anchor_x = 0;
+	active.anchor_y = 0;
+
+	adding.adding = false;
 }
 
 void ArrangerPanel::add(const std::string &filename)
 {
-	add(filename, 0, 0);
+	for(const auto &[name, _] : textures)
+		if(name == filename)
+			throw std::runtime_error("Already exists");
+
+	adding.adding = true;
+	adding.filename = filename;
+
+	repaint();
 }
 
 void ArrangerPanel::add(const std::string &filename, int x, int y)
 {
-	if(x < 0 || y < 0)
+	if(x < padding || y < padding)
 		throw std::runtime_error("invalid placement");
 
 	for(const auto &[name, _] : textures)
@@ -40,8 +52,8 @@ void ArrangerPanel::add(const std::string &filename, int x, int y)
 			throw std::runtime_error("Already exists");
 
 	Targa tga(filename.c_str());
-
-	std::pair<std::string, Texture> pair(filename, std::move(Texture(tga, x, y)));
+	Texture tex(tga, x, y);
+	std::pair<std::string, Texture> pair(filename, std::move(tex));
 	textures.push_back(std::move(pair));
 
 	repaint();
@@ -73,6 +85,9 @@ std::vector<std::string> ArrangerPanel::get_list() const
 	{
 		items.push_back(std::to_string(i) + ": " + textures[i].first);
 	}
+
+	if(adding.adding)
+		items.push_back(std::to_string(textures.size()) + ": " + adding.filename);
 
 	return items;
 }
@@ -205,12 +220,28 @@ void ArrangerPanel::paintEvent(QPaintEvent*)
 	if(active.name.length() > 0)
 		painter.drawText(QPoint(0, painter.fontMetrics().height()), press::swrite("Active Texture: {} [{}x{}]{}", active.name, textures[active.name].w, textures[active.name].h, align ? " ALIGNED" : "").c_str());
 #endif
+
+	// add mode
+	if(adding.adding)
+	{
+		QColor color(200, 0, 200, 100);
+		painter.setPen(color);
+		painter.setBrush(color);
+		painter.drawRect(QRect(QPoint(0, 0), QPoint(width(), height())));
+	}
 }
 
 void ArrangerPanel::mousePressEvent(QMouseEvent *event)
 {
 	const int x = event->pos().x();
 	const int y = event->pos().y();
+
+	if(adding.adding)
+	{
+		adding.adding = false;
+		add(adding.filename, x, y);
+		return;
+	}
 
 	for(const auto &[name, tex] : textures)
 	{
