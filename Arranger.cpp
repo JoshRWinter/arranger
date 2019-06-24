@@ -11,7 +11,7 @@
 
 Arranger::Arranger()
 {
-	resize(900, 700);
+	resize(1200, 700);
 	setWindowTitle("Atlas Arranger");
 
 	// layouts
