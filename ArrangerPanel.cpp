@@ -243,15 +243,21 @@ void ArrangerPanel::mousePressEvent(QMouseEvent *event)
 		return;
 	}
 
-	for(const auto &[name, tex] : textures)
+	if(textures.size() > 0)
 	{
-		if(x > tex.x && x < tex.x + tex.w && y > tex.y && y < tex.y + tex.h)
+		for(auto it = textures.end() - 1; it >= textures.begin(); --it)
 		{
-			active.name = name;
-			active.anchor_x = x - tex.x;
-			active.anchor_y = y - tex.y;
-			repaint();
-			return;
+			Texture &tex = it->second;
+			const std::string &name = it->first;
+
+			if(x > tex.x && x < tex.x + tex.w && y > tex.y && y < tex.y + tex.h)
+			{
+				active.name = name;
+				active.anchor_x = x - tex.x;
+				active.anchor_y = y - tex.y;
+				repaint();
+				return;
+			}
 		}
 	}
 
