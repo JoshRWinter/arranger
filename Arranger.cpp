@@ -130,15 +130,22 @@ void Arranger::slot_remove_texture()
 
 void Arranger::slot_compact()
 {
-	int moved;
-	do
+	try
 	{
-		moved = 0;
+		int moved;
+		do
+		{
+			moved = 0;
 
-		moved += m_panel->pack_left() ? 1 : 0;
-		moved += m_panel->pack_up() ? 1 : 0;
+			moved += m_panel->pack_left() ? 1 : 0;
+			moved += m_panel->pack_up() ? 1 : 0;
+		}
+		while(moved > 0);
 	}
-	while(moved > 0);
+	catch(const std::runtime_error &re)
+	{
+		QMessageBox::critical(this, "Can't compact", re.what());
+	}
 }
 
 void Arranger::slot_export()

@@ -44,14 +44,12 @@ void ArrangerPanel::add(const std::string &filename)
 
 void ArrangerPanel::add(const std::string &filename, int x, int y)
 {
-	if(x < padding)
-		x = padding;
-	if(y < padding)
-		y = padding;
-
 	for(const auto &[name, _] : textures)
 		if(name == filename)
 			throw std::runtime_error("Already exists");
+
+	if(x < padding || y < padding)
+		throw std::runtime_error(filename + " (" + std::to_string(x) + ", " + std::to_string(y) + ")" + " is out of bounds!");
 
 	Targa tga(filename.c_str());
 	Texture tex(tga, x, y);
@@ -105,9 +103,9 @@ void ArrangerPanel::flip()
 
 	for(auto &[name, tex] : textures)
 	{
-		tex.y = largest_y - (tex.y + tex.h);
-		if(tex.y < 0)
-			fprintf(stderr, "ERROR ----------------------- %s is at %d\n", name.c_str(), tex.y);
+		tex.y = largest_y - (tex.y + tex.h) + padding;
+		if(tex.y < padding)
+			throw std::runtime_error(name + " is at " + std::to_string(tex.y) + "\n");
 	}
 
 	repaint();
@@ -182,6 +180,7 @@ std::string ArrangerPanel::info() const
 	return "[" + std::to_string(maxwidth) + "x" + std::to_string(maxheight) + "], " +
 	sizestr + "MB";
 }
+
 std::vector<Entry> ArrangerPanel::get_entries() const
 {
 	std::vector<Entry> entries;
@@ -355,17 +354,11 @@ bool ArrangerPanel::pack(bool left)
 	for(const auto &[n, t] : textures)
 	{
 		if(t.x < padding || t.y < padding)
-		{
-			QMessageBox::critical(this, "Can't pack", (n + " is out of bounds!").c_str());
-			return false;
-		}
+			throw std::runtime_error(n + " is out of bounds!" + std::to_string(t.x) + "," + std::to_string(t.y));
 	}
 
 	if(Texture::colliding(textures, padding))
-	{
-		QMessageBox::critical(this, "Can't pack", "There are collisions!");
-		return false;
-	}
+		throw std::runtime_error("There are collisions!");
 
 	bool changed = false;
 	int moved = 0;
